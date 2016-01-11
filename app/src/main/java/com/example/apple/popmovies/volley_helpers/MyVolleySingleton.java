@@ -58,6 +58,7 @@ public class MyVolleySingleton {
             // Activity or BroadcastReceiver if someone passes one in.
             mRequestQueue = Volley.newRequestQueue(mCtx.getApplicationContext());
         }
+
         return mRequestQueue;
     }
 
@@ -68,6 +69,7 @@ public class MyVolleySingleton {
     public ImageLoader getImageLoader() {
         return mImageLoader;
     }
+
 
 
 }

@@ -1,6 +1,6 @@
 package com.example.apple.popmovies;
 
-import android.content.Intent;
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -29,6 +29,13 @@ import java.util.List;
  */
 public class MainActivityFragment extends Fragment {
 
+    public interface OnMovieClickListener {
+        public void onMovieSelected(Movie movie);
+    }
+
+    OnMovieClickListener mCallBack;
+
+
     public static String RESULT_OBJ_KEY = "result_obj_key";
 
     GridView gridView_mainGrid;
@@ -53,15 +60,16 @@ public class MainActivityFragment extends Fragment {
         gridView_mainGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (moviePoster != null) {
-                    Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                    intent.putExtra(MainActivityFragment.RESULT_OBJ_KEY, moviePoster.getResults().get(position));
-                    startActivity(intent);
-                } else if (myMovies != null) {
-                    Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                    intent.putExtra(MainActivityFragment.RESULT_OBJ_KEY, myMovies.get(position));
-                    startActivity(intent);
-                }
+//                if (moviePoster != null) {
+//                    Intent intent = new Intent(getActivity(), DetailsActivity.class);
+//                    intent.putExtra(MainActivityFragment.RESULT_OBJ_KEY, moviePoster.getResults().get(position));
+//                    startActivity(intent);
+//                } else if (myMovies != null) {
+//                    Intent intent = new Intent(getActivity(), DetailsActivity.class);
+//                    intent.putExtra(MainActivityFragment.RESULT_OBJ_KEY, myMovies.get(position));
+//                    startActivity(intent);
+//                }
+                mCallBack.onMovieSelected(myMovies.get(position));
             }
         });
 
@@ -134,12 +142,26 @@ public class MainActivityFragment extends Fragment {
         gridView_mainGrid.setVisibility(View.VISIBLE);
         moviePoster = VolleyHelper.moviePoster;
 
+        myMovies = moviePoster.getResults();
+
         GridImageAdapter gridImageAdapter = new GridImageAdapter(getActivity(), moviePoster);
 
         gridView_mainGrid.setAdapter(gridImageAdapter);
 
     }
 
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            mCallBack = (OnMovieClickListener) activity;
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        }
+
+    }
 
 
 

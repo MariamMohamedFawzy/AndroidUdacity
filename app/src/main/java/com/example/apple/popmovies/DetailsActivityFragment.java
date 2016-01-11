@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +53,10 @@ public class DetailsActivityFragment extends Fragment {
 
     View rootView;
 
+    View headerView;
+
+    public int headerMovieId;
+
 
     @Nullable
     @Override
@@ -60,11 +65,26 @@ public class DetailsActivityFragment extends Fragment {
 
         listView_details = (ListView) rootView.findViewById(R.id.listView_details);
 
+//        if (currentMovie == null && getArguments() != null) {
+//            Log.i("details", "args");
+//            Bundle args = getArguments();
+//            currentMovie = (Movie) args.getSerializable(MainActivityFragment.RESULT_OBJ_KEY);
+//        }
+//       else
+        if (currentMovie == null && getActivity().getIntent() != null) {
+            Log.i("details", "intent");
+            Intent intent = getActivity().getIntent();
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                currentMovie = (Movie) bundle.get(MainActivityFragment.RESULT_OBJ_KEY);
+            }
+        }
 
-        Intent intent = getActivity().getIntent();
-        Bundle bundle = intent.getExtras();
-        currentMovie = (Movie) bundle.get(MainActivityFragment.RESULT_OBJ_KEY);
-
+        if (currentMovie != null) {
+            Log.i("frag", "details");
+        } else {
+            Log.i("frag", "details null");
+        }
         return rootView;
     }
 
@@ -89,14 +109,30 @@ public class DetailsActivityFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+
+        if (currentMovie != null) {
+            getReviewsAndTrailers();
+        }
+
+    }
+
+    public void updateView(Movie movie) {
+        Log.i("update", "update" + movie.getId());
+        currentMovie = movie;
+        if (currentMovie != null) {
+            getReviewsAndTrailers();
+        }
+    }
+
+    public void getReviewsAndTrailers() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sortPref = sharedPref.getString("sort_pref", "1");
         if (!sortPref.equals("-1")) {
+//            Log.i("details", "get");
             downloadReviewsAndTrailers();
         } else {
             getFavoriteMovieReviewsAndTrailers();
         }
-
     }
 
     private void getFavoriteMovieReviewsAndTrailers() {
@@ -134,6 +170,7 @@ public class DetailsActivityFragment extends Fragment {
 
 
     private void setRecyclerAdapter() {
+        Log.i("details", "rec");
         List<Video> listVideos = new ArrayList<Video>();
 
         List<Review> listReviews = new ArrayList<Review>();
@@ -151,13 +188,29 @@ public class DetailsActivityFragment extends Fragment {
         listView_details.setAdapter(myListAdapter);
 
         if (!hasHeader) {
-            View header_view = getHeader();
-            listView_details.addHeaderView(header_view);
+            addHeader();
             hasHeader = true;
+        } else if (currentMovie.getId() != headerMovieId) {
+            listView_details.removeHeaderView(headerView);
+            addHeader();
         }
+//      else {
+//            listView_details.removeHeaderView(headerView);
+//            headerView = getHeader();
+//            listView_details.addHeaderView(headerView);
+//        }
+
+
+
+    }
+
+    public void addHeader() {
+        headerView = getHeader();
+        listView_details.addHeaderView(headerView);
     }
 
     public View getHeader() {
+        headerMovieId = currentMovie.getId();
         View header_view = LayoutInflater.from(getActivity()).inflate(R.layout.header_recycler, listView_details, false);
         TextView movieName ;
         ImageView moviePoster;
@@ -225,7 +278,6 @@ public class DetailsActivityFragment extends Fragment {
         ConnectivityManager cm = (ConnectivityManager)getActivity().getSystemService(getActivity().CONNECTIVITY_SERVICE);
         return (cm.getActiveNetworkInfo() != null);
     }
-
 
 
 }
