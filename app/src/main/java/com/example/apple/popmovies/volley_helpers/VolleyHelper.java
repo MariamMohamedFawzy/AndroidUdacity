@@ -9,8 +9,8 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.example.apple.popmovies.DetailsActivity;
-import com.example.apple.popmovies.MainActivity;
+import com.example.apple.popmovies.DetailsActivityFragment;
+import com.example.apple.popmovies.MainActivityFragment;
 import com.example.apple.popmovies.models.MoviePoster;
 import com.example.apple.popmovies.models.Reviews;
 import com.example.apple.popmovies.models.Videos;
@@ -33,7 +33,7 @@ public class VolleyHelper {
 
     public static MoviePoster moviePoster;
 
-    public static void downloadPopularMoviesUrls() {
+    public void downloadPopularMoviesUrls(final MainActivityFragment fragment) {
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(ctx);
         String sortPref = sharedPref.getString("sort_pref", "1");
@@ -54,8 +54,7 @@ public class VolleyHelper {
                     public void onResponse(String response) {
                         Gson gson = new Gson();
                         moviePoster = gson.fromJson(response, MoviePoster.class);
-                        MainActivity mainActivity = (MainActivity) ctx;
-                        mainActivity.getImages();
+                        fragment.getImages();
 
                     }
                 },
@@ -73,7 +72,7 @@ public class VolleyHelper {
     }
 
 
-    public static void downloadReviewsOfMovie(int movieId) {
+    public static void downloadReviewsOfMovie(int movieId, final DetailsActivityFragment fragment) {
         String myUrl = MOVIE_TRAILERS_REVIEWS_URL + "/" + String.valueOf(movieId) + "/reviews" + "?api_key=" + "b926e7aa59069adde3edc2d1cb54f27c";
 
         StringRequest strRequest = new StringRequest(Request.Method.GET, myUrl,
@@ -82,8 +81,7 @@ public class VolleyHelper {
                     public void onResponse(String response) {
                         Gson gson = new Gson();
                         Reviews reviews = gson.fromJson(response, Reviews.class);
-                        DetailsActivity detailsActivity = (DetailsActivity) ctx;
-                        detailsActivity.setReviews(reviews);
+                        fragment.setReviews(reviews);
                         Log.i("tab rev", String.valueOf(reviews.getResults().size()));
 
                     }
@@ -101,7 +99,7 @@ public class VolleyHelper {
     }
 
 
-    public static void downloadTrailersOfMovie(int movieId) {
+    public static void downloadTrailersOfMovie(int movieId, final DetailsActivityFragment fragment) {
         String myUrl = MOVIE_TRAILERS_REVIEWS_URL + "/" + String.valueOf(movieId) + "/videos" + "?api_key=" + "b926e7aa59069adde3edc2d1cb54f27c";
 
 
@@ -111,9 +109,8 @@ public class VolleyHelper {
                     public void onResponse(String response) {
                         Gson gson = new Gson();
                         Videos videos = gson.fromJson(response, Videos.class);
-                        DetailsActivity detailsActivity = (DetailsActivity) ctx;
                         Log.i("tab vid", String.valueOf(videos.getResults().size()));
-                        detailsActivity.setVideos(videos);
+                        fragment.setVideos(videos);
 
                     }
                 },

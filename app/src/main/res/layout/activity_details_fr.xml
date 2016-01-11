@@ -8,10 +8,17 @@
     android:id="@+id/details_layout"
     >
 
-    <fragment
+    <!--<android.support.v7.widget.RecyclerView-->
+    <!--android:id="@+id/recycler_view_details"-->
+    <!--android:scrollbars="vertical"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--/>-->
+
+
+    <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="com.example.apple.popmovies.DetailsActivityFragment"
-        android:id="@+id/fragment2"
+        android:id="@+id/listView_details"
         android:layout_gravity="center" />
 </FrameLayout>
