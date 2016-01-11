@@ -99,8 +99,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
                 getSupportFragmentManager().findFragmentById(R.id.fragment_details);
 
         if (detailsActivityFragment != null) {
+            detailsActivityFragment.ctx = this;
             detailsActivityFragment.updateView(movie);
         } else {
+
+            Log.i("details", "intent ya mama");
 
             Intent detailIntent = new Intent(this, DetailsActivity.class);
             detailIntent.putExtra(MainActivityFragment.RESULT_OBJ_KEY, movie);

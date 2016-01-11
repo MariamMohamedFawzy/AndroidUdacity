@@ -1,5 +1,6 @@
 package com.example.apple.popmovies;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
@@ -8,8 +9,13 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -57,6 +63,62 @@ public class DetailsActivityFragment extends Fragment {
 
     public int headerMovieId;
 
+    ShareActionProvider mShareActionProvider;
+
+    Context ctx;
+
+    Context context;
+
+    public DetailsActivityFragment() {
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+        if (getActivity() != null) {
+            getActivity().getMenuInflater().inflate(R.menu.share_menu, menu);
+
+//            inflater.inflate(R.menu.share_menu, menu);
+//        }
+
+
+            // Locate MenuItem with ShareActionProvider
+            MenuItem item = menu.findItem(R.id.menu_item_share);
+
+            // Fetch and store ShareActionProvider
+            mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+
+            setShareIntent(createShareForecastIntent());
+        }
+
+//        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+
+    private Intent createShareForecastIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        shareIntent.setType("text/plain");
+        String movieTitle = "";
+        if (currentMovie != null) {
+            movieTitle = currentMovie.getOriginalTitle();
+        }
+        shareIntent.putExtra(Intent.EXTRA_TEXT,
+                "Movie : " + movieTitle);
+        return shareIntent;
+    }
+
+    private void setShareIntent(Intent shareIntent) {
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(shareIntent);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return super.onOptionsItemSelected(item);
+    }
 
     @Nullable
     @Override
@@ -85,6 +147,10 @@ public class DetailsActivityFragment extends Fragment {
         } else {
             Log.i("frag", "details null");
         }
+
+        context = getActivity() == null? ctx : getActivity();
+
+
         return rootView;
     }
 
@@ -121,11 +187,12 @@ public class DetailsActivityFragment extends Fragment {
         currentMovie = movie;
         if (currentMovie != null) {
             getReviewsAndTrailers();
+            setShareIntent(createShareForecastIntent());
         }
     }
 
     public void getReviewsAndTrailers() {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         String sortPref = sharedPref.getString("sort_pref", "1");
         if (!sortPref.equals("-1")) {
 //            Log.i("details", "get");
@@ -136,7 +203,7 @@ public class DetailsActivityFragment extends Fragment {
     }
 
     private void getFavoriteMovieReviewsAndTrailers() {
-        MovieDBHelper movieDBHelper = new MovieDBHelper(getActivity());
+        MovieDBHelper movieDBHelper = new MovieDBHelper(context);
         reviews = movieDBHelper.getReviewsOfMovie(currentMovie.getId());
         videos = movieDBHelper.getTrailersOfMovie(currentMovie.getId());
 
@@ -149,7 +216,7 @@ public class DetailsActivityFragment extends Fragment {
     private void downloadReviewsAndTrailers() {
         if (isNetworkAvailable()) {
             VolleyHelper volleyHelper = new VolleyHelper();
-            volleyHelper.setContext(getActivity());
+            volleyHelper.setContext(context);
             volleyHelper.downloadReviewsOfMovie(currentMovie.getId(), this);
             volleyHelper.downloadTrailersOfMovie(currentMovie.getId(), this);
         }  else {
@@ -183,7 +250,7 @@ public class DetailsActivityFragment extends Fragment {
             listReviews = reviews.getResults();
         }
 
-        MyListAdapter myListAdapter = new MyListAdapter(listVideos, listReviews, getActivity());
+        MyListAdapter myListAdapter = new MyListAdapter(listVideos, listReviews, context);
 
         listView_details.setAdapter(myListAdapter);
 
@@ -211,7 +278,7 @@ public class DetailsActivityFragment extends Fragment {
 
     public View getHeader() {
         headerMovieId = currentMovie.getId();
-        View header_view = LayoutInflater.from(getActivity()).inflate(R.layout.header_recycler, listView_details, false);
+        View header_view = LayoutInflater.from(context).inflate(R.layout.header_recycler, listView_details, false);
         TextView movieName ;
         ImageView moviePoster;
         TextView movieYear;
@@ -233,11 +300,11 @@ public class DetailsActivityFragment extends Fragment {
             public void onClick(View view) {
 
                 if (movieAddToFavorite.getText().equals("ADD TO FAVORITE")) {
-                    MovieDBHelper movieDBHelper = new MovieDBHelper(getActivity());
+                    MovieDBHelper movieDBHelper = new MovieDBHelper(context);
                     movieDBHelper.addMovieWithReviewsAndTrailers(currentMovie, reviews.getResults(), videos.getResults());
                     movieAddToFavorite.setText("REMOVE FROM FAVORITE");
                 } else {
-                    MovieDBHelper movieDBHelper = new MovieDBHelper(getActivity());
+                    MovieDBHelper movieDBHelper = new MovieDBHelper(context);
                     movieDBHelper.deleteMovie(currentMovie.getId());
                     movieAddToFavorite.setText("ADD TO FAVORITE");
                 }
@@ -251,7 +318,7 @@ public class DetailsActivityFragment extends Fragment {
         movieName.setText(currentMovie.getOriginalTitle());
 
         String myUrl = "http://image.tmdb.org/t/p/" + "w185" + "/" + currentMovie.getBackdropPath();
-        Picasso.with(getActivity()).load(myUrl).into(moviePoster);
+        Picasso.with(context).load(myUrl).into(moviePoster);
 
         movieYear.setText(currentMovie.getReleaseDate());
         movieRating.setText(currentMovie.getVoteAverage() + "/10");
@@ -259,7 +326,8 @@ public class DetailsActivityFragment extends Fragment {
 
         // TODO: check if it is in the favorite movies
 
-        MovieDBHelper movieDBHelper = new MovieDBHelper(getActivity());
+
+        MovieDBHelper movieDBHelper = new MovieDBHelper(context);
         boolean exists= movieDBHelper.getCertainMovie(currentMovie.getId());
         if (exists) {
             movieAddToFavorite.setText("REMOVE FROM FAVORITE");
@@ -275,7 +343,7 @@ public class DetailsActivityFragment extends Fragment {
 
 
     private boolean isNetworkAvailable() {
-        ConnectivityManager cm = (ConnectivityManager)getActivity().getSystemService(getActivity().CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);
         return (cm.getActiveNetworkInfo() != null);
     }
 

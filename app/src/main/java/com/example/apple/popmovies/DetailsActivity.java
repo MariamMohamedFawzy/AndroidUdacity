@@ -2,6 +2,7 @@ package com.example.apple.popmovies;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
@@ -38,22 +39,21 @@ public class DetailsActivity extends AppCompatActivity {
 //    public static final String MyPREFERENCES_json = "MyPrefs_JSON_fav" ;
 //    SharedPreferences sharedpreferences;
 
+    private ShareActionProvider mShareActionProvider;
+
+//    DetailsActivityFragment detailsActivityFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
-//        frameLayout = (FrameLayout) findViewById(R.id.details_layout);
-
-
+//        detailsActivityFragment = (DetailsActivityFragment) getSupportFragmentManager().findFragmentById(R.id.fragment2);
 
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.menu_details, menu);
         return true;
     }
 
@@ -70,8 +70,10 @@ public class DetailsActivity extends AppCompatActivity {
             return true;
         }
 
+
         return super.onOptionsItemSelected(item);
     }
+
 }
 
 
