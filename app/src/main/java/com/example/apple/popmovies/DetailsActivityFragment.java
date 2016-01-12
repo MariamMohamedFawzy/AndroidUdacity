@@ -36,6 +36,10 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 /**
  * Created by apple on 1/11/16.
  */
@@ -276,44 +280,56 @@ public class DetailsActivityFragment extends Fragment {
         listView_details.addHeaderView(headerView);
     }
 
+    @Bind(R.id.textView_movieName) TextView movieName ;
+    @Bind(R.id.imageView_moviePoster) ImageView moviePoster;
+    @Bind(R.id.textView_movieYear) TextView movieYear;
+    @Bind(R.id.textView_movieRating) TextView movieRating;
+    @Bind(R.id.button_movieAddToFavorite)  Button movieAddToFavorite;
+    @Bind(R.id.textView_movieOverview) TextView movieOverview;
+
+//    static final ButterKnife.Setter<View, Boolean> Enabled = new ButterKnife.Setter<View, Boolean>() {
+//        @Override
+//        public void set(View view, Boolean value, int index) {
+//            view.setEnabled(value);
+//        }
+//    };
+
     public View getHeader() {
         headerMovieId = currentMovie.getId();
         View header_view = LayoutInflater.from(context).inflate(R.layout.header_recycler, listView_details, false);
-        TextView movieName ;
-        ImageView moviePoster;
-        TextView movieYear;
-        TextView movieDuration;
-        TextView movieRating;
-        final Button movieAddToFavorite;
-        TextView movieOverview;
 
-        movieName = (TextView) header_view.findViewById(R.id.textView_movieName);
-        moviePoster = (ImageView) header_view.findViewById(R.id.imageView_moviePoster);
-        movieYear = (TextView) header_view.findViewById(R.id.textView_movieYear);
-//        movieDuration = (TextView) header_view.findViewById(R.id.textView_movieDuration);
-        movieRating = (TextView) header_view.findViewById(R.id.textView_movieRating);
-        movieAddToFavorite = (Button) header_view.findViewById(R.id.button_movieAddToFavorite);
-        movieOverview = (TextView) header_view.findViewById(R.id.textView_movieOverview);
+        ButterKnife.bind(this, header_view);
 
-        movieAddToFavorite.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if (movieAddToFavorite.getText().equals("ADD TO FAVORITE")) {
-                    MovieDBHelper movieDBHelper = new MovieDBHelper(context);
-                    movieDBHelper.addMovieWithReviewsAndTrailers(currentMovie, reviews.getResults(), videos.getResults());
-                    movieAddToFavorite.setText("REMOVE FROM FAVORITE");
-                } else {
-                    MovieDBHelper movieDBHelper = new MovieDBHelper(context);
-                    movieDBHelper.deleteMovie(currentMovie.getId());
-                    movieAddToFavorite.setText("ADD TO FAVORITE");
-                }
+//        ButterKnife.apply(movieAddToFavorite, Enabled, false);
 
 
 
 
-            }
-        });
+
+
+//        movieName = (TextView) header_view.findViewById(R.id.textView_movieName);
+//        moviePoster = (ImageView) header_view.findViewById(R.id.imageView_moviePoster);
+//        movieYear = (TextView) header_view.findViewById(R.id.textView_movieYear);
+////        movieDuration = (TextView) header_view.findViewById(R.id.textView_movieDuration);
+//        movieRating = (TextView) header_view.findViewById(R.id.textView_movieRating);
+//        movieAddToFavorite = (Button) header_view.findViewById(R.id.button_movieAddToFavorite);
+//        movieOverview = (TextView) header_view.findViewById(R.id.textView_movieOverview);
+
+//        movieAddToFavorite.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//                if (movieAddToFavorite.getText().equals("ADD TO FAVORITE")) {
+//                    MovieDBHelper movieDBHelper = new MovieDBHelper(context);
+//                    movieDBHelper.addMovieWithReviewsAndTrailers(currentMovie, reviews.getResults(), videos.getResults());
+//                    movieAddToFavorite.setText("REMOVE FROM FAVORITE");
+//                } else {
+//                    MovieDBHelper movieDBHelper = new MovieDBHelper(context);
+//                    movieDBHelper.deleteMovie(currentMovie.getId());
+//                    movieAddToFavorite.setText("ADD TO FAVORITE");
+//                }
+//            }
+//        });
 
         movieName.setText(currentMovie.getOriginalTitle());
 
@@ -338,6 +354,19 @@ public class DetailsActivityFragment extends Fragment {
         movieOverview.setText(currentMovie.getOverview());
 
         return header_view;
+    }
+
+    @OnClick(R.id.button_movieAddToFavorite)
+    public void clickAddFav(Button b) {
+        if (b.getText().equals("ADD TO FAVORITE")) {
+            MovieDBHelper movieDBHelper = new MovieDBHelper(context);
+            movieDBHelper.addMovieWithReviewsAndTrailers(currentMovie, reviews.getResults(), videos.getResults());
+            b.setText("REMOVE FROM FAVORITE");
+        } else {
+            MovieDBHelper movieDBHelper = new MovieDBHelper(context);
+            movieDBHelper.deleteMovie(currentMovie.getId());
+            b.setText("ADD TO FAVORITE");
+        }
     }
 
 
